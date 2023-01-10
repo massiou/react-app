@@ -1,28 +1,96 @@
 <html>
   <head>
-    <title>Calculateur d'équidistance</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY5Ko2G-pybtFUctOe-FH0uWc7u-NcYr0"
+    ></script>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY5Ko2G-pybtFUctOe-FH0uWc7u-NcYr0&libraries=places"
+    ></script>
+    <title>Buddycenter</title>
   </head>
   <body>
-    <h1>Calculateur d'équidistance</h1>
-    <form>
-      <label for="address1">Adresse 1:</label><br>
-      <input type="text" id="address1" name="address1"><br>
-      <label for="address2">Adresse 2:</label><br>
-      <input type="text" id="address2" name="address2"><br><br>
-      <button type="button" onclick="calculateMidpoint()">Calculer</button>
+    <h1>Buddycenter</h1>
+    <form id="address-form">
+    </form>
+    <button type="button" onclick="addAddressField()">Ajouter une autre adresse</button>
+    <br>
+    <br>
+    <button id='toto' type="button" onclick="calculateMidpoint()">Calculer</button>
     </form> 
     <br>
-    <div id="output"></div>    <script>
+    <div id="output"></div>
+    <div id="places"></div>
+
+    <div style="height: 50%; width:100%;" id="map">
+    </div>
+
+
+
+
+
+
+
+    <!-- 
+     The `defer` attribute causes the callback to execute after the full HTML
+     document has been parsed. For non-blocking uses, avoiding race conditions,
+     and consistent behavior across browsers, consider loading using Promises
+     with https://www.npmjs.com/package/@googlemaps/js-api-loader.
+    -->
+
+    <script type="text/javascript">
+      var addressCounter = 0;
+      function displayMap(lat, lng, index) {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: new google.maps.LatLng(lat, lng),
+        zoom: 15,
+      })
+      new google.maps.Marker({
+    position: { lat: lat, lng: lng},
+    map,
+    label: "buddycenter",
+  })
+    
+    }
+  function addAddressField() {
+    // Incrémenter le compteur d'adresses
+    addressCounter++;
+
+    // Créer un nouveau champ de saisie pour l'adresse
+    var newAddressField = document.createElement("input");
+    newAddressField.setAttribute("type", "text");
+    newAddressField.setAttribute("id", "address" + addressCounter);
+    newAddressField.setAttribute("name", "address" + addressCounter);
+    newAddressField.style.width = "50%";
+
+
+    // Créer une nouvelle étiquette pour le champ de saisie
+    var newAddressLabel = document.createElement("label");
+    newAddressLabel.setAttribute("for", "address" + addressCounter);
+    newAddressLabel.innerHTML = "Adresse " + addressCounter + ":";
+
+    // Ajouter le champ de saisie et son étiquette à la page
+    var addressForm = document.getElementById("address-form");
+    addressForm.appendChild(newAddressLabel);
+    addressForm.appendChild(newAddressField);
+    addressForm.appendChild(document.createElement("br"));
+
+  // Create the autocomplete object, restricting the search predictions to
+  autocomplete = new google.maps.places.Autocomplete(newAddressField, {
+    fields: ["address_components", "geometry"],
+    types: ["address"],
+  })
+  newAddressField.focus();
+}
+
+
+
       // Remplacez YOUR_API_KEY par votre clé d'API Google Maps Geocoding
       var apiKey = 'AIzaSyCY5Ko2G-pybtFUctOe-FH0uWc7u-NcYr0';
-      var lat1;
-        var lng1;
-        var lat2;
-        var lng2;
-        var lat;
-        var lng;
-
-    
+      var lat;
+      var lng;
+      addAddressField();
+      addAddressField();
       async function fetchUrl(url) {
         try {
             const response = await fetch(url, {
@@ -35,37 +103,59 @@
         }
     }
 
-      async function calculateMidpoint() {
-        // Récupérer les adresses saisies par l'utilisateur
-        var address1 = document.getElementById('address1').value;
-        var address2 = document.getElementById('address2').value;
+    async function calculatePoint(address) {
+      var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address) + '&key=' + apiKey;
+      // Envoyer une requête HTTP GET à l'API pour chaque adresse
+      var response = await fetchUrl(url);
 
-        // Appeler l'API Google Maps Geocoding pour obtenir les coordonnées GPS des deux adresses
-        var url1 = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address1) + '&key=' + apiKey;
-        var url2 = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address2) + '&key=' + apiKey;
-        
-        // Envoyer une requête HTTP GET à l'API pour chaque adresse
-        var response = await fetchUrl(url1);
+      console.log("response: " + JSON.stringify(response))
+      lat = response.results[0].geometry.location.lat;
+      lng = response.results[0].geometry.location.lng;
+      console.log("lat func: " + lat)
 
-        console.log("response: " + JSON.stringify(response))
-        lat1 = response.results[0].geometry.location.lat;
-        lng1 = response.results[0].geometry.location.lng;
-        
-        var response = await fetchUrl(url2);
-        lat2 = response.results[0].geometry.location.lat;
-        lng2 = response.results[0].geometry.location.lng;
+      return [lat, lng];
+    }
+    async function calculateMidpoint() {
+    // Récupérer tous les champs de saisie d'adresse
+    var addressFields = document.querySelectorAll("input[name^='address']");
+    // Créer un tableau pour stocker les adresses
+    var addresses = [];
 
-        // Calculer les coordonnées GPS moyennes des deux adresses
-        var lat = (parseFloat(lat1) + parseFloat(lat2)) / 2;
-        var lng = (parseFloat(lng1) + parseFloat(lng2)) / 2;
-        console.log("lat: " + lat);
-        console.log("lng: " + lng);
-        // Afficher les coordonnées GPS moyennes à l'utilisateur
-        var url3 = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + lng +'&key=' + apiKey;
-        var response = await fetchUrl(url3);
-        address = response.results[0].formatted_address
-        document.getElementById('output').innerHTML = 'Adresse du lieu équidistant : ' + address;
-      };
+    // Ajouter les adresses saisies dans le tableau
+    addressFields.forEach(function(addressField) {
+      if (addressField.value) {
+        addresses.push(addressField.value);
+      }
+    });
+    // Vérifie si il y a des adresses
+    if (addresses.length < 2) {
+      alert("Veuillez saisir au moins 2 adresses.");
+      return;
+    }
+    var lat_total = 0.0;
+    var lng_total = 0.0;
+    for (let i = 0; i <addressFields.length; i++) {
+      var coord = await calculatePoint(addressFields[i].value);
+      console.log("coord[0] " + coord[0])
+
+      lat_total = parseFloat(coord[0]) + lat_total;
+      lng_total = parseFloat(coord[1]) + lng_total;
+      console.log("lat: " + lat_total)
+      console.log("lng: " + lng_total)
+    }
+    lat = lat_total / addressFields.length;
+    lng = lng_total / addressFields.length;
+
+    // Afficher les coordonnées GPS moyennes à l'utilisateur
+    var url3 = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + lng +'&key=' + apiKey;
+    var response = await fetchUrl(url3);
+    address = response.results[0].formatted_address
+    document.getElementById('output').innerHTML = 'Adress: ' + address;
+
+
+    displayMap(lat, lng, 0);
+    }
+
       </script>
       </body>
 </html>
