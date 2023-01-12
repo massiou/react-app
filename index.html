@@ -45,16 +45,6 @@
     }
 
 
-  async function getPlaces(lat, lng) {
-    document.getElementById('places').innerHTML = 'Places: ';
-
-    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + lat + "%2C" + lng +"&radius=1500&type=restaurant&key=AIzaSyCY5Ko2G-pybtFUctOe-FH0uWc7u-NcYr0";
-    response = await fetchUrl(url);
-    document.getElementById('places').innerHTML = 'Places: After';
-
-    document.getElementById('places').innerHTML = 'Places: ' + response.data;
-
-  }
   function addAddressField() {
     // Incrémenter le compteur d'adresses
     addressCounter++;
@@ -177,8 +167,7 @@
     document.getElementById('output').innerHTML = 'Adress: ' + address;
 
     displayMap(lat, lng);
-    getPlaces(lat, lng)
-
+    calculatePoint(address);
     }
 
       </script>
