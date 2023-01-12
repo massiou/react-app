@@ -100,6 +100,7 @@
             }
             else {
               alert("Bad request");
+              return;
             }
         } catch (error) {
             console.error(error);
@@ -109,6 +110,7 @@
     async function calculatePoint(address) {
       if (address === "") {
         alert("empty addres")
+        return;
       }
       var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address) + '&key=' + apiKey;
       // Envoyer une requête HTTP GET à l'API pour chaque adresse
@@ -125,6 +127,7 @@
       }
       else {
         alert("No valid answer")
+        return;
       }
     }
     async function calculateMidpoint() {
