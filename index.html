@@ -7,43 +7,34 @@
     <script
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY5Ko2G-pybtFUctOe-FH0uWc7u-NcYr0&libraries=places"
     ></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
     <title>Buddycenter</title>
   </head>
   <body>
-    <h1>Buddycenter</h1>
-    <form id="address-form">
+    <h1 style="text-align: center;">Buddycenter</h1>
+    <form style="text-align: center;" id="address-form">
     </form>
-    <button type="button" onclick="addAddressField()">Ajouter une autre adresse</button>
+    <div class="container" style="text-align: center;">
+    <button class="btn btn-primary" type="button" onclick="addAddressField()">Ajouter une autre adresse</button>
     <br>
     <br>
-    <button id='toto' type="button" onclick="calculateMidpoint()">Calculer</button>
+    <button id='toto' class="btn btn-primary" type="button" onclick="calculateMidpoint()">Calculer</button>
     </form> 
     <br>
+  </div>
     <div id="output"></div>
     <div id="places"></div>
 
     <div style="height: 50%; width:100%;" id="map">
     </div>
 
-
-
-
-
-
-
-    <!-- 
-     The `defer` attribute causes the callback to execute after the full HTML
-     document has been parsed. For non-blocking uses, avoiding race conditions,
-     and consistent behavior across browsers, consider loading using Promises
-     with https://www.npmjs.com/package/@googlemaps/js-api-loader.
-    -->
-
     <script type="text/javascript">
       var addressCounter = 0;
-      function displayMap(lat, lng, index) {
+      function displayMap(lat, lng) {
       map = new google.maps.Map(document.getElementById("map"), {
         center: new google.maps.LatLng(lat, lng),
-        zoom: 15,
+        zoom: 10,
       })
       new google.maps.Marker({
     position: { lat: lat, lng: lng},
@@ -52,22 +43,41 @@
   })
     
     }
+
+
+  async function getPlaces(lat, lng) {
+    document.getElementById('places').innerHTML = 'Places: ';
+
+    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + lat + "%2C" + lng +"&radius=1500&type=restaurant&key=AIzaSyCY5Ko2G-pybtFUctOe-FH0uWc7u-NcYr0";
+    response = await fetchUrl(url);
+    document.getElementById('places').innerHTML = 'Places: After';
+
+    document.getElementById('places').innerHTML = 'Places: ' + response.data;
+
+  }
   function addAddressField() {
     // Incrémenter le compteur d'adresses
     addressCounter++;
 
     // Créer un nouveau champ de saisie pour l'adresse
     var newAddressField = document.createElement("input");
+    newAddressField.setAttribute("class", "input-group-text");
     newAddressField.setAttribute("type", "text");
     newAddressField.setAttribute("id", "address" + addressCounter);
     newAddressField.setAttribute("name", "address" + addressCounter);
-    newAddressField.style.width = "50%";
+    newAddressField.setAttribute("style", "margin: auto;");
+    newAddressField.style.width = "40%";
 
 
     // Créer une nouvelle étiquette pour le champ de saisie
     var newAddressLabel = document.createElement("label");
     newAddressLabel.setAttribute("for", "address" + addressCounter);
+    newAddressLabel.setAttribute("class", "label");
     newAddressLabel.innerHTML = "Adresse " + addressCounter + ":";
+    
+    var newAddressSpan = document.createElement("span");
+    newAddressSpan.setAttribute("class", "badge badge-secondary");
+    newAddressSpan.innerHTML = "Adresse " + addressCounter + ":";
 
     // Ajouter le champ de saisie et son étiquette à la page
     var addressForm = document.getElementById("address-form");
@@ -83,8 +93,6 @@
   newAddressField.focus();
 }
 
-
-
       // Remplacez YOUR_API_KEY par votre clé d'API Google Maps Geocoding
       var apiKey = 'AIzaSyCY5Ko2G-pybtFUctOe-FH0uWc7u-NcYr0';
       var lat;
@@ -97,23 +105,37 @@
                 method: 'GET',
             });
             const exam = await response.json();
-            return exam;
+            if (response.status == 200) {
+              return exam;
+            }
+            else {
+              alert("Bad request");
+            }
         } catch (error) {
             console.error(error);
         }
     }
 
     async function calculatePoint(address) {
+      if (address === "") {
+        alert("empty addres")
+      }
       var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address) + '&key=' + apiKey;
       // Envoyer une requête HTTP GET à l'API pour chaque adresse
       var response = await fetchUrl(url);
-
+      
       console.log("response: " + JSON.stringify(response))
+
+      if (response.results.length > 0) {
       lat = response.results[0].geometry.location.lat;
       lng = response.results[0].geometry.location.lng;
       console.log("lat func: " + lat)
 
       return [lat, lng];
+      }
+      else {
+        alert("No valid answer")
+      }
     }
     async function calculateMidpoint() {
     // Récupérer tous les champs de saisie d'adresse
@@ -142,7 +164,9 @@
       lng_total = parseFloat(coord[1]) + lng_total;
       console.log("lat: " + lat_total)
       console.log("lng: " + lng_total)
-    }
+  
+
+  }
     lat = lat_total / addressFields.length;
     lng = lng_total / addressFields.length;
 
@@ -152,8 +176,9 @@
     address = response.results[0].formatted_address
     document.getElementById('output').innerHTML = 'Adress: ' + address;
 
+    displayMap(lat, lng);
+    getPlaces(lat, lng)
 
-    displayMap(lat, lng, 0);
     }
 
       </script>
