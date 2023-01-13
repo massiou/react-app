@@ -190,7 +190,7 @@ function toggleBounce() {
     var url3 = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + lng +'&key=' + apiKey;
     var response = await fetchUrl(url3);
     address = response.results[0].formatted_address
-    document.getElementById('output').innerHTML = "<br><br><span class=\"label label-primary\">Adress: " + address + "</span><br><br>";
+    document.getElementById('output').innerHTML = "<br><h2><span class=\"label label-primary\">Adress: " + address + "</span></h2><br>";
 
     displayMap(lat, lng);
     calculatePoint(address);
