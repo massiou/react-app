@@ -18,7 +18,16 @@
     <title>Buddycenter</title>
   </head>
   <body>
-    <h1 style="text-align: center;">Buddycenter</h1>
+    <!-- Background image -->
+    <div id="intro" class="bg-image shadow-2-strong">
+      <div class="mask" style="background-color: rgba(224, 83, 22, 0.414);">
+        <div class="container d-flex align-items-center justify-content-center text-center h-100">
+          <div class="text-white">
+            <h1 class="mb-3">Buddycenter</h1>
+          </div>
+        </div>
+      </div>
+    </div>
     <form style="text-align: center;" id="address-form">
     </form>
     <div class="container" style="text-align: center;">
@@ -30,7 +39,6 @@
     <br>
   </div>
     <div style="text-align: center;" id="output"></div>
-    <div style="text-align: center;" id="places"></div>
 
     <div style="margin-left: auto; margin-right: auto; text-align: center;height: 50%; width:70%;" id="map">
     </div>
@@ -58,6 +66,7 @@ function toggleBounce() {
     marker.setAnimation(google.maps.Animation.BOUNCE);
   }
 }
+  return map;
     }
 
 
@@ -115,14 +124,16 @@ function toggleBounce() {
         try {
             const response = await fetch(url, {
                 method: 'GET',
-                mode: "cors"
+                mode: 'cors',
+                redirect: 'follow',
             });
             const exam = await response.json();
+
             if (response.status == 200) {
               return exam;
             }
             else {
-              alert("Bad request");
+              alert("Bad request: " + response.status);
               return;
             }
         } catch (error) {
@@ -138,7 +149,7 @@ function toggleBounce() {
       var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address) + '&key=' + apiKey;
       // Envoyer une requête HTTP GET à l'API pour chaque adresse
       var response = await fetchUrl(url);
-      
+      console.log(response)
       console.log("response: " + JSON.stringify(response))
 
       if (response.results.length > 0) {
@@ -153,6 +164,21 @@ function toggleBounce() {
         return;
       }
     }
+
+    async function calculateItin(origin, destination, map) {
+      var directionsService = new google.maps.DirectionsService();
+      var directionsRenderer = new google.maps.DirectionsRenderer();
+      directionsRenderer.setMap(map);
+      var request = {
+      origin: origin,
+      destination: destination,
+      travelMode: google.maps.TravelMode["DRIVING"]
+  }
+      directionsService.route(request, function(response, status) {
+      directionsRenderer.setDirections(response);
+  })
+}
+
     async function calculateMidpoint() {
     // Récupérer tous les champs de saisie d'adresse
     var addressFields = document.querySelectorAll("input[name^='address']");
@@ -173,28 +199,42 @@ function toggleBounce() {
     var lat_total = 0.0;
     var lng_total = 0.0;
     for (let i = 0; i <addressFields.length; i++) {
-      var coord = await calculatePoint(addressFields[i].value);
+      var address = addressFields[i].value;
+      var coord = await calculatePoint(address);
       console.log("coord[0] " + coord[0])
 
       lat_total = parseFloat(coord[0]) + lat_total;
       lng_total = parseFloat(coord[1]) + lng_total;
       console.log("lat: " + lat_total)
       console.log("lng: " + lng_total)
+
+      marker  = new google.maps.Marker({
+      position: { lat: coord[0], lng: coord[1]},
+      map,
+      animation: google.maps.Animation.DROP,
+      label: address,
+  })
   
 
   }
-    lat = lat_total / addressFields.length;
-    lng = lng_total / addressFields.length;
+    lat_buddy = lat_total / addressFields.length;
+    lng_buddy = lng_total / addressFields.length;
 
     // Afficher les coordonnées GPS moyennes à l'utilisateur
-    var url3 = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + lng +'&key=' + apiKey;
+    var url3 = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat_buddy + ',' + lng_buddy +'&key=' + apiKey;
     var response = await fetchUrl(url3);
-    address = response.results[0].formatted_address
-    document.getElementById('output').innerHTML = "<br><h2><span class=\"label label-primary\">Adress: " + address + "</span></h2><br>";
+    address_buddy = response.results[0].formatted_address
+    document.getElementById('output').innerHTML = "<br><h2><span class=\"label label-primary\">Adress: " + address_buddy + "</span></h2><br>";
 
-    displayMap(lat, lng);
-    calculatePoint(address);
+    map = displayMap(lat_buddy, lng_buddy);
+    calculatePoint(address_buddy);
+    
+
+    
+    for (let i = 0; i <addressFields.length; i++) {
+      calculateItin(address_buddy, addressFields[i].value,map);
     }
+  }
 
       </script>
       </body>
