@@ -16,6 +16,8 @@
 let map;
 let addressCounter = 0;
 let apiKey = 'AIzaSyCY5Ko2G-pybtFUctOe-FH0uWc7u-NcYr0';
+let apiKey2 = 'AIzaSyBsyxqj05LitTAFc8hjWjNII6--GELrI3U';
+
 let lat;
 let lng;
 
@@ -117,7 +119,7 @@ async function calculatePoint(address) {
         alert("empty addres")
         return;
     }
-    let url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address) + '&key=' + apiKey;
+    let url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address) + '&key=' + apiKey2;
     // Envoyer une requête HTTP GET à l'API pour chaque adresse
     let response = await fetchUrl(url);
     console.log(response)
@@ -211,7 +213,7 @@ async function calculateMidpoint() {
     let lng_buddy = lng_total / addressFields.length;
 
     // Afficher les coordonnées GPS moyennes à l'utilisateur
-    let url3 = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat_buddy + ',' + lng_buddy + '&key=' + apiKey;
+    let url3 = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat_buddy + ',' + lng_buddy + '&key=' + apiKey2;
     let response = await fetchUrl(url3);
     let address_buddy = response.results[0].formatted_address
     document.getElementById('output').innerHTML = "<br><h2><span class=\"label label-primary\">Adress: " + address_buddy + "</span></h2><br>";
