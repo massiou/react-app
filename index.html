@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
@@ -7,20 +8,32 @@
    <script
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCY5Ko2G-pybtFUctOe-FH0uWc7u-NcYr0&libraries=places"
     ></script>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
 
-<!-- Optional theme -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
-
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+  <script src="./index.js" defer></script>
+  <style type="text/css"> 
+    #map {
+      width: 100%;
+      height: 70%;
+      overflow: hidden;
+      display: flex;
+      justify-content: center; 
+      margin: auto;
+      position: absolute;
+      text-align: center;
+    }
+    div{
+      text-align: center;
+    }
+  </style>
     <title>Buddycenter</title>
   </head>
-  <body>
+  <body onload="initialize()">
     <!-- Background image -->
     <div id="intro" class="bg-image shadow-2-strong">
-      <div class="mask" style="background-color: rgba(224, 83, 22, 0.414);">
+      <div class="mask" style="background-color: rgba(38, 158, 205, 0.414);">
         <div class="container d-flex align-items-center justify-content-center text-center h-100">
           <div class="text-white">
             <h1 class="mb-3">Buddycenter</h1>
@@ -30,212 +43,18 @@
     </div>
     <form style="text-align: center;" id="address-form">
     </form>
-    <div class="container" style="text-align: center;">
+    <div class="container">
     <button class="btn btn-primary" type="button" onclick="addAddressField()">Add an address</button>
     <br>
     <br>
-    <button id='toto' class="btn btn-primary" type="button" onclick="calculateMidpoint()">Go!</button>
+    <button id="calculateMidpoint" class="btn btn-primary" type="button" onclick="calculateMidpoint()">Go!</button>
     </form> 
     <br>
-  </div>
-    <div style="text-align: center;" id="output"></div>
-
-    <div style="margin-left: auto; margin-right: auto; text-align: center;height: 50%; width:70%;" id="map">
     </div>
-
-    <script type="text/javascript">
-      var addressCounter = 0;
-      function displayMap(lat, lng) {
-      map = new google.maps.Map(document.getElementById("map"), {
-        center: new google.maps.LatLng(lat, lng),
-        zoom: 10,
-      })
-    marker  = new google.maps.Marker({
-    position: { lat: lat, lng: lng},
-    map,
-    animation: google.maps.Animation.DROP,
-    label: "buddycenter",
-  })
-
-  marker.addListener("click", toggleBounce);
-
-function toggleBounce() {
-  if (marker.getAnimation() !== null) {
-    marker.setAnimation(null);
-  } else {
-    marker.setAnimation(google.maps.Animation.BOUNCE);
-  }
-}
-  return map;
-    }
-
-
-  function addAddressField() {
-    // Incrémenter le compteur d'adresses
-    addressCounter++;
-
-    // Créer un nouveau champ de saisie pour l'adresse
-    var newAddressField = document.createElement("input");
-    newAddressField.setAttribute("class", "input-group-text");
-    newAddressField.setAttribute("type", "text");
-    newAddressField.setAttribute("id", "address" + addressCounter);
-    newAddressField.setAttribute("name", "address" + addressCounter);
-    newAddressField.setAttribute("style", "margin: auto;");
-    newAddressField.style.width = "40%";
-
-    var removeButton = document.createElement("button");
-    removeButton.setAttribute("id", "remove" + addressCounter);
-    removeButton.setAttribute("class", "btn btn-primary");
-    //removeButton.style.width = "100px";
-    //removeButton.style.height = "30px";
-    removeButton.textContent = "remove";
-    removeButton.setAttribute("value", "remove");
-    removeButton.setAttribute("type", "button");
-
-
-
-    // Ajouter le champ de saisie et son étiquette à la page
-    var addressForm = document.getElementById("address-form");
-    addressForm.appendChild(newAddressField);
-    addressForm.appendChild(removeButton);
-
-    addressForm.appendChild(document.createElement("br"));
-
-    removeButton.addEventListener('click', () => {
-      newAddressField.remove();
-      removeButton.remove();
-      
-});
-
-  // Create the autocomplete object, restricting the search predictions to
-  autocomplete = new google.maps.places.Autocomplete(newAddressField, {
-    fields: ["address_components", "geometry"],
-    types: ["address"],
-  })
-}
-
-      // Remplacez YOUR_API_KEY par votre clé d'API Google Maps Geocoding
-      var apiKey = 'AIzaSyCY5Ko2G-pybtFUctOe-FH0uWc7u-NcYr0';
-      var lat;
-      var lng;
-      addAddressField();
-      addAddressField();
-      async function fetchUrl(url) {
-        try {
-            const response = await fetch(url, {
-                method: 'GET',
-                mode: 'cors',
-                redirect: 'follow',
-            });
-            const exam = await response.json();
-
-            if (response.status == 200) {
-              return exam;
-            }
-            else {
-              alert("Bad request: " + response.status);
-              return;
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    async function calculatePoint(address) {
-      if (address === "") {
-        alert("empty addres")
-        return;
-      }
-      var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address) + '&key=' + apiKey;
-      // Envoyer une requête HTTP GET à l'API pour chaque adresse
-      var response = await fetchUrl(url);
-      console.log(response)
-      console.log("response: " + JSON.stringify(response))
-
-      if (response.results.length > 0) {
-      lat = response.results[0].geometry.location.lat;
-      lng = response.results[0].geometry.location.lng;
-      console.log("lat func: " + lat)
-
-      return [lat, lng];
-      }
-      else {
-        alert("No valid answer")
-        return;
-      }
-    }
-
-    async function calculateItin(origin, destination, map) {
-      var directionsService = new google.maps.DirectionsService();
-      var directionsRenderer = new google.maps.DirectionsRenderer();
-      directionsRenderer.setMap(map);
-      var request = {
-      origin: origin,
-      destination: destination,
-      travelMode: google.maps.TravelMode["DRIVING"]
-  }
-      directionsService.route(request, function(response, status) {
-      directionsRenderer.setDirections(response);
-  })
-}
-
-    async function calculateMidpoint() {
-    // Récupérer tous les champs de saisie d'adresse
-    var addressFields = document.querySelectorAll("input[name^='address']");
-    // Créer un tableau pour stocker les adresses
-    var addresses = [];
-
-    // Ajouter les adresses saisies dans le tableau
-    addressFields.forEach(function(addressField) {
-      if (addressField.value) {
-        addresses.push(addressField.value);
-      }
-    });
-    // Vérifie si il y a des adresses
-    if (addresses.length < 2) {
-      alert("Veuillez saisir au moins 2 adresses.");
-      return;
-    }
-    var lat_total = 0.0;
-    var lng_total = 0.0;
-    for (let i = 0; i <addressFields.length; i++) {
-      var address = addressFields[i].value;
-      var coord = await calculatePoint(address);
-      console.log("coord[0] " + coord[0])
-
-      lat_total = parseFloat(coord[0]) + lat_total;
-      lng_total = parseFloat(coord[1]) + lng_total;
-      console.log("lat: " + lat_total)
-      console.log("lng: " + lng_total)
-
-      marker  = new google.maps.Marker({
-      position: { lat: coord[0], lng: coord[1]},
-      map,
-      animation: google.maps.Animation.DROP,
-      label: address,
-  })
-  
-
-  }
-    lat_buddy = lat_total / addressFields.length;
-    lng_buddy = lng_total / addressFields.length;
-
-    // Afficher les coordonnées GPS moyennes à l'utilisateur
-    var url3 = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat_buddy + ',' + lng_buddy +'&key=' + apiKey;
-    var response = await fetchUrl(url3);
-    address_buddy = response.results[0].formatted_address
-    document.getElementById('output').innerHTML = "<br><h2><span class=\"label label-primary\">Adress: " + address_buddy + "</span></h2><br>";
-
-    map = displayMap(lat_buddy, lng_buddy);
-    calculatePoint(address_buddy);
-    
-
-    
-    for (let i = 0; i <addressFields.length; i++) {
-      calculateItin(address_buddy, addressFields[i].value,map);
-    }
-  }
-
-      </script>
+    <div id="output"></div>
+    <br>
+    <br>
+    <div id="map">
+    </div>
       </body>
 </html>
