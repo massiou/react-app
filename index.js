@@ -1,9 +1,9 @@
 
 let map;
-var addressCounter = 0;
-var apiKey = 'AIzaSyCY5Ko2G-pybtFUctOe-FH0uWc7u-NcYr0';
-var lat;
-var lng;
+let addressCounter = 0;
+let apiKey = 'AIzaSyCY5Ko2G-pybtFUctOe-FH0uWc7u-NcYr0';
+let lat;
+let lng;
 
 function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
@@ -18,7 +18,7 @@ function displayMap(lat, lng) {
         center: new google.maps.LatLng(lat, lng),
         zoom: 10,
     })
-    marker = new google.maps.Marker({
+    let marker = new google.maps.Marker({
         position: { lat: lat, lng: lng },
         map,
         animation: google.maps.Animation.DROP,
@@ -43,7 +43,7 @@ function addAddressField() {
     addressCounter++;
 
     // Créer un nouveau champ de saisie pour l'adresse
-    var newAddressField = document.createElement("input");
+    let newAddressField = document.createElement("input");
     newAddressField.setAttribute("class", "input-group-text");
     newAddressField.setAttribute("type", "text");
     newAddressField.setAttribute("id", "address" + addressCounter);
@@ -51,7 +51,7 @@ function addAddressField() {
     newAddressField.setAttribute("style", "margin: auto;");
     newAddressField.style.width = "40%";
 
-    var removeButton = document.createElement("button");
+    let removeButton = document.createElement("button");
     removeButton.setAttribute("id", "remove" + addressCounter);
     removeButton.setAttribute("class", "btn btn-primary");;
     removeButton.textContent = "remove";
@@ -59,7 +59,7 @@ function addAddressField() {
     removeButton.setAttribute("type", "button");
 
     // Ajouter le champ de saisie et son étiquette à la page
-    var addressForm = document.getElementById("address-form");
+    let addressForm = document.getElementById("address-form");
     addressForm.appendChild(newAddressField);
     addressForm.appendChild(removeButton);
     addressForm.appendChild(document.createElement("br"));
@@ -71,7 +71,7 @@ function addAddressField() {
     });
 
     // Create the autocomplete object, restricting the search predictions to
-    autocomplete = new google.maps.places.Autocomplete(newAddressField, {
+    let autocomplete = new google.maps.places.Autocomplete(newAddressField, {
         fields: ["address_components", "geometry"],
         types: ["address"],
     })
@@ -103,9 +103,9 @@ async function calculatePoint(address) {
         alert("empty addres")
         return;
     }
-    var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address) + '&key=' + apiKey;
+    let url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address) + '&key=' + apiKey;
     // Envoyer une requête HTTP GET à l'API pour chaque adresse
-    var response = await fetchUrl(url);
+    let response = await fetchUrl(url);
     console.log(response)
     console.log("response: " + JSON.stringify(response))
 
@@ -123,10 +123,10 @@ async function calculatePoint(address) {
 }
 
 async function calculateItin(origin, destination, map) {
-    var directionsService = new google.maps.DirectionsService();
-    var directionsRenderer = new google.maps.DirectionsRenderer();
+    let directionsService = new google.maps.DirectionsService();
+    let directionsRenderer = new google.maps.DirectionsRenderer();
     directionsRenderer.setMap(map);
-    var request = {
+    let request = {
         origin: origin,
         destination: destination,
         travelMode: google.maps.TravelMode["DRIVING"]
@@ -137,19 +137,19 @@ async function calculateItin(origin, destination, map) {
 }
 
 async function getPlaces(lat_buddy, lng_buddy, map) {
-    var request = {
+    let request = {
         location: { lat: lat_buddy, lng: lng_buddy },
         radius: '10000',
         type: ['cinema', 'restaurant', 'bar', 'pub']
     };
-    service = new google.maps.places.PlacesService(map);
-    response = service.nearbySearch(request, callback_places);
+    let service = new google.maps.places.PlacesService(map);
+    let response = service.nearbySearch(request, callback_places);
     return response
 }
 
 async function callback_places(results, status) {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
-        for (var i = 0; i < 5; i++) {
+        for (let i = 0; i < 5; i++) {
             console.log(results[i].data);
 
         }
@@ -158,9 +158,9 @@ async function callback_places(results, status) {
 
 async function calculateMidpoint() {
     // Récupérer tous les champs de saisie d'adresse
-    var addressFields = document.querySelectorAll("input[name^='address']");
+    let addressFields = document.querySelectorAll("input[name^='address']");
     // Créer un tableau pour stocker les adresses
-    var addresses = [];
+    let addresses = [];
 
     // Ajouter les adresses saisies dans le tableau
     addressFields.forEach(function (addressField) {
@@ -173,8 +173,8 @@ async function calculateMidpoint() {
         alert("Veuillez saisir au moins 2 adresses.");
         return;
     }
-    var lat_total = 0.0;
-    var lng_total = 0.0;
+    let lat_total = 0.0;
+    let lng_total = 0.0;
     for (let i = 0; i < addressFields.length; i++) {
         var address = addressFields[i].value;
         var coord = await calculatePoint(address);
@@ -193,13 +193,13 @@ async function calculateMidpoint() {
         })
 
     }
-    lat_buddy = lat_total / addressFields.length;
-    lng_buddy = lng_total / addressFields.length;
+    let lat_buddy = lat_total / addressFields.length;
+    let lng_buddy = lng_total / addressFields.length;
 
     // Afficher les coordonnées GPS moyennes à l'utilisateur
-    var url3 = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat_buddy + ',' + lng_buddy + '&key=' + apiKey;
-    var response = await fetchUrl(url3);
-    address_buddy = response.results[0].formatted_address
+    let url3 = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat_buddy + ',' + lng_buddy + '&key=' + apiKey;
+    let response = await fetchUrl(url3);
+    let address_buddy = response.results[0].formatted_address
     document.getElementById('output').innerHTML = "<br><h2><span class=\"label label-primary\">Adress: " + address_buddy + "</span></h2><br>";
 
     displayMap(lat_buddy, lng_buddy);
